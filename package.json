@@ -5,12 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/chat.js"
+    "start": "node src/chat.js",
+    "dev": "node --watch src/chat.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "hypercore-crypto": "^3.6.0",
     "hyperswarm": "^4.11.7"
   }
 }
