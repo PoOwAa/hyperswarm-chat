@@ -27,6 +27,12 @@ async function main() {
     terminal: true,
   });
 
+  rl.pause();
+  rl.on("SIGINT", () => {
+    console.log("\n🔴 Exiting...");
+    process.exit(0);
+  });
+
   // Join the topic
   await swarm
     .join(topic, {
@@ -37,9 +43,19 @@ async function main() {
 
   console.log("🔗 Joined topic:", topic.toString("hex").slice(0, 8));
 
+  swarm.on("listening", () => {
+    console.log("👂 Swarm is listening for connections...");
+  });
+
   swarm.on("connection", (socket, info) => {
     const peerId = info.publicKey.toString("hex").slice(0, 8);
     console.log(`🟢 Connected to peer ${peerId}`);
+
+    if (rl.paused) {
+      rl.resume();
+      rl.prompt();
+      console.log("💬 Type your message:");
+    }
 
     // Add peer to the set of sockets
     sockets.add(socket);
@@ -48,6 +64,11 @@ async function main() {
     socket.on("close", () => {
       sockets.delete(socket);
       console.log(`🔴 Disconnected from peer ${peerId}`);
+
+      if (sockets.size === 0) {
+        rl.pause();
+        console.log("💬 No peers connected. Waiting for connections...");
+      }
     });
 
     // Data from peer
@@ -61,6 +82,7 @@ async function main() {
     for (const socket of sockets) {
       socket.write(line);
     }
+    rl.prompt();
   });
 }
 
